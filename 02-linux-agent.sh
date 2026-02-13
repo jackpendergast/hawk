@@ -13,6 +13,20 @@
 # ============================================================================
 set -euo pipefail
 
+# ---------------------------------------------------------------------------
+# Dependency check -- install curl if missing
+# ---------------------------------------------------------------------------
+if ! command -v curl &>/dev/null; then
+    echo "[*] curl not found, installing..."
+    if command -v apt-get &>/dev/null; then
+        apt-get update -qq && apt-get install -y curl
+    elif command -v dnf &>/dev/null; then
+        dnf install -y curl
+    elif command -v yum &>/dev/null; then
+        yum install -y curl
+    fi
+fi
+
 WAZUH_VERSION="4.7"
 WAZUH_AGENT_DEB="wazuh-agent_4.7.3-1_amd64.deb"
 WAZUH_AGENT_RPM="wazuh-agent-4.7.3-1.x86_64.rpm"
