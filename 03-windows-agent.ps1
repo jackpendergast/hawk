@@ -142,23 +142,23 @@ if (Test-Path $clamdExe) {
 # Scheduled task: hourly ClamAV scan
 # (inject requirement: "set to run hourly")
 # ---------------------------------------------------------------------------
-# $clamscanExe = "$ClamDir\clamscan.exe"
-# if (Test-Path $clamscanExe) {
-#     Write-Host "[*] Creating hourly scan scheduled task..."
-#     $Action = New-ScheduledTaskAction -Execute $clamscanExe `
-#                -Argument "--recursive --infected --log=`"$ClamDir\scan.log`" C:\"
-#     $Trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(5) `
-#         -RepetitionInterval (New-TimeSpan -Hours 1) `
-#         -RepetitionDuration ([TimeSpan]::MaxValue)
+$clamscanExe = "$ClamDir\clamscan.exe"
+if (Test-Path $clamscanExe) {
+    Write-Host "[*] Creating hourly scan scheduled task..."
+    schtasks.exe /Create /F /TN "ClamAV_Hourly_Scan" `
+        /SC HOURLY `
+        /TR "`"$clamscanExe`" --recursive --infected --log=`"$ClamDir\scan.log`" C:\" `
+        /RU "SYSTEM" `
+        /RL HIGHEST
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[*] Hourly ClamAV scan task registered."
+    } else {
+        Write-Host "[!] Failed to create scheduled task (exit code $LASTEXITCODE)."
+    }
+} else {
+    Write-Host "[!] clamscan.exe not found at expected path."
+}
 
-#     $Settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -DontStopIfGoingOnBatteries
-#     Register-ScheduledTask -TaskName "ClamAV_Hourly_Scan" -Action $Action `
-#         -Trigger $Trigger -Settings $Settings -User "SYSTEM" `
-#         -RunLevel Highest -Force | Out-Null
-#     Write-Host "[*] Hourly ClamAV scan task registered."
-# } else {
-#     Write-Host "[!] clamscan.exe not found at expected path."
-# }
 
 # ===========================================================================
 # SECTION 2: Wazuh Agent
