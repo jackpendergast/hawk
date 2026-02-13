@@ -54,7 +54,12 @@ sudo bash 02-linux-agent.sh <MANAGER_IP>
 ```
 
 **Windows agents (4 machines):**
-
+```powershell
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jackpendergast/hawk/main/03-windows-agent.ps1" -OutFile "C:\03-windows-agent.ps1"
+Set-ExecutionPolicy Bypass -Scope Process -Force
+C:\03-windows-agent.ps1 -ManagerIP "<MANAGER_IP>"
+```
 ```powershell
 # Download the script, then:
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/YOUR_REPO/wazuh-ccdc-deploy/main/03-windows-agent.ps1" -OutFile "03-windows-agent.ps1"
