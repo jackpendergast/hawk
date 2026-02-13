@@ -145,11 +145,10 @@ if (Test-Path $clamdExe) {
 $clamscanExe = "$ClamDir\clamscan.exe"
 if (Test-Path $clamscanExe) {
     Write-Host "[*] Creating hourly scan scheduled task..."
-    schtasks.exe /Create /F /TN "ClamAV_Hourly_Scan" `
-        /SC HOURLY `
-        /TR "`"$clamscanExe`" --recursive --infected --log=`"$ClamDir\scan.log`" C:\" `
-        /RU "SYSTEM" `
-        /RL HIGHEST
+    # Write a batch wrapper to avoid quoting hell between PowerShell and schtasks
+    $batchFile = "$ClamDir\hourly-scan.bat"
+    Set-Content -Path $batchFile -Value "@echo off`r`n`"$clamscanExe`" --recursive --infected --log=`"$ClamDir\scan.log`" C:\"
+    schtasks.exe /Create /F /TN "ClamAV_Hourly_Scan" /SC HOURLY /TR "`"$batchFile`"" /RU "SYSTEM" /RL HIGHEST
     if ($LASTEXITCODE -eq 0) {
         Write-Host "[*] Hourly ClamAV scan task registered."
     } else {
