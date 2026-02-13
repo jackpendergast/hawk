@@ -169,22 +169,12 @@ if [[ -d "${SCRIPT_DIR}/wazuh-ccdc-config" ]]; then
     echo "[*] Found local wazuh-ccdc-config directory."
     CCDC_DIR="${SCRIPT_DIR}/wazuh-ccdc-config"
 else
-    echo "[*] Downloading CCDC config files from GitHub..."
+    echo "[*] Downloading CCDC config script from GitHub..."
     CCDC_DIR="/tmp/wazuh-ccdc-config"
-    mkdir -p "${CCDC_DIR}/manager" "${CCDC_DIR}/rules" "${CCDC_DIR}/splunk"
+    mkdir -p "${CCDC_DIR}"
 
     curl -sO --output-dir "${CCDC_DIR}" "${REPO_URL}/wazuh-ccdc-config/setup-wazuh-ccdc.sh"
-    curl -sO --output-dir "${CCDC_DIR}" "${REPO_URL}/wazuh-ccdc-config/setup-splunk-receiver.sh"
-    curl -sO --output-dir "${CCDC_DIR}/manager" "${REPO_URL}/wazuh-ccdc-config/manager/agent.conf"
-    curl -sO --output-dir "${CCDC_DIR}/manager" "${REPO_URL}/wazuh-ccdc-config/manager/ossec.conf"
-    curl -sO --output-dir "${CCDC_DIR}/rules" "${REPO_URL}/wazuh-ccdc-config/rules/ccdc_rules.xml"
-    curl -sO --output-dir "${CCDC_DIR}/splunk" "${REPO_URL}/wazuh-ccdc-config/splunk/inputs.conf"
-    curl -sO --output-dir "${CCDC_DIR}/splunk" "${REPO_URL}/wazuh-ccdc-config/splunk/props.conf"
-    curl -sO --output-dir "${CCDC_DIR}/splunk" "${REPO_URL}/wazuh-ccdc-config/splunk/indexes.conf"
-    curl -sO --output-dir "${CCDC_DIR}/splunk" "${REPO_URL}/wazuh-ccdc-config/splunk/ccdc_warroom.xml"
-
     chmod +x "${CCDC_DIR}/setup-wazuh-ccdc.sh"
-    chmod +x "${CCDC_DIR}/setup-splunk-receiver.sh"
 
     echo "[*] Download complete."
 fi
