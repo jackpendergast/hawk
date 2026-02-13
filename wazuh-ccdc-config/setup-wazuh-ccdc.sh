@@ -466,9 +466,9 @@ fi
 # ---------------------------------------------------------------------------
 # 6. Add custom rules to ruleset
 # ---------------------------------------------------------------------------
-if ! grep -q 'ccdc_rules.xml' "$OSSEC_CONF"; then
-    sed -i '/<\/ruleset>/i\    <include>rules/ccdc_rules.xml</include>' "$OSSEC_CONF" 2>/dev/null || true
-fi
+# if ! grep -q 'ccdc_rules.xml' "$OSSEC_CONF"; then
+#     sed -i '/<\/ruleset>/i\    <include>rules/ccdc_rules.xml</include>' "$OSSEC_CONF" 2>/dev/null || true
+# fi
 
 # ---------------------------------------------------------------------------
 # 7. Enable vulnerability detection
