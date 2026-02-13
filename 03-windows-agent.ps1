@@ -163,7 +163,7 @@ if (Test-Path $clamscanExe) {
 # ===========================================================================
 Write-Host "`n===== Wazuh Agent Installation ====="
 
-$WazuhURL  = "https://packages.wazuh.com/$WazuhVersion/$WazuhAgentMSI"
+$WazuhURL  = "https://packages.wazuh.com/4.x/windows/$WazuhAgentMSI"
 $WazuhPath = "$TempDir\$WazuhAgentMSI"
 
 Write-Host "[*] Downloading Wazuh agent..."
