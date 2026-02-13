@@ -81,19 +81,32 @@ else
     freshclam || echo "[!] freshclam initial pull failed"
     # Figure out which service name exists
     # Figure out which service name exists
-    if systemctl list-unit-files | grep -q "clamd@"; then  # Changed from "clamd@scan" to "clamd@"
+    echo "[*] Detecting ClamAV daemon service..."
+
+    # Stronger detection for Fedora / Oracle Linux / RHEL
+    if systemctl list-unit-files | grep -q "clamd@scan"; then
         CLAMD_SVC="clamd@scan"
-        # Ensure the scan config is usable (RHEL/Oracle often ship with Example line)
-        sed -i 's/^Example/#Example/' /etc/clamd.d/scan.conf 2>/dev/null || true
-        # Make sure LocalSocket is set
-        grep -q "^LocalSocket" /etc/clamd.d/scan.conf 2>/dev/null || \
-            echo "LocalSocket /run/clamd.scan/clamd.sock" >> /etc/clamd.d/scan.conf
-    elif systemctl list-unit-files | grep -q "clamav-daemon"; then
-        CLAMD_SVC="clamav-daemon"
+        echo "[*] Found clamd@scan.service"
+    elif systemctl list-unit-files | grep -q "clamd@"; then
+        CLAMD_SVC="clamd@scan"
+        echo "[*] Found clamd@ template → using clamd@scan"
     else
-        echo "[!] No supported ClamAV daemon service found. Skipping enable."
-        #Optionally, add a fallback or exit here if critical
-        continue  # Or exit 1 if you want to halt
+        echo "[!] Could not detect clamd service. Trying manual start instead..."
+        CLAMD_SVC="clamd@scan"
+    fi
+    
+    # Critical fixes for Fedora
+    sed -i 's/^Example/#Example/' /etc/clamd.d/scan.conf 2>/dev/null || true
+    sed -i 's/^#LocalSocket/LocalSocket/' /etc/clamd.d/scan.conf 2>/dev/null || true
+    
+    systemctl enable --now "$CLAMD_SVC" 2>/dev/null || true
+    systemctl enable --now clamav-freshclam 2>/dev/null || true
+    
+    # Final verification
+    if systemctl is-active --quiet "$CLAMD_SVC"; then
+        echo "[✓] ClamAV daemon ($CLAMD_SVC) is now running!"
+    else
+        echo "[!] Warning: ClamAV daemon failed to start. Check logs with: systemctl status $CLAMD_SVC"
     fi
     systemctl enable --now "$CLAMD_SVC"
     systemctl enable --now clamav-freshclam 2>/dev/null || true
