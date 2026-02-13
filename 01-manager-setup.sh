@@ -6,6 +6,17 @@
 # ============================================================================
 set -euo pipefail
 
+# ---------------------------------------------------------------------------
+# Dependency check
+# ---------------------------------------------------------------------------
+echo "[*] Checking dependencies..."
+for cmd in curl tar; do
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "[*] Installing missing dependency: $cmd"
+        apt-get update -qq && apt-get install -y "$cmd"
+    fi
+done
+
 WAZUH_VERSION="4.7"
 NODE_NAME="wazuh-aio"        # arbitrary single-node name
 DASHBOARD_PORT=443
