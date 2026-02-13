@@ -170,13 +170,13 @@ echo "===== Wazuh Agent Installation ====="
 
 if [[ "$PKG_MGR" == "apt" ]]; then
     cd /tmp
-    curl -sO "https://packages.wazuh.com/${WAZUH_VERSION}/${WAZUH_AGENT_DEB}"
+    curl -sO "https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/${WAZUH_AGENT_DEB}"
     WAZUH_MANAGER="${MANAGER_IP}" \
     WAZUH_REGISTRATION_PASSWORD="${REG_PASSWORD}" \
         apt-get install -y "./${WAZUH_AGENT_DEB}"
 else
     cd /tmp
-    curl -sO "https://packages.wazuh.com/${WAZUH_VERSION}/${WAZUH_AGENT_RPM}"
+    curl -sO "https://packages.wazuh.com/4.x/yum/${WAZUH_AGENT_RPM}"
     WAZUH_MANAGER="${MANAGER_IP}" \
     WAZUH_REGISTRATION_PASSWORD="${REG_PASSWORD}" \
         rpm -ivh "${WAZUH_AGENT_RPM}" || \
