@@ -71,22 +71,22 @@ echo "[*] config.yml written for single-node deployment at ${MANAGER_IP}"
 # 3. Generate certificates and config files
 # ---------------------------------------------------------------------------
 echo "[*] Generating config files and certificates..."
-bash wazuh-install.sh --generate-config-files
+bash wazuh-install.sh --generate-config-files -i
 
 # ---------------------------------------------------------------------------
 # 4. Install components in order
 # ---------------------------------------------------------------------------
 echo "[*] Installing Wazuh Indexer..."
-bash wazuh-install.sh --wazuh-indexer "${NODE_NAME}"
+bash wazuh-install.sh --wazuh-indexer "${NODE_NAME}" -i
 
 echo "[*] Starting Indexer cluster..."
-bash wazuh-install.sh --start-cluster
+bash wazuh-install.sh --start-cluster -i
 
 echo "[*] Installing Wazuh Server..."
-bash wazuh-install.sh --wazuh-server "${NODE_NAME}"
+bash wazuh-install.sh --wazuh-server "${NODE_NAME}" -i
 
 echo "[*] Installing Wazuh Dashboard..."
-bash wazuh-install.sh --wazuh-dashboard "${NODE_NAME}"
+bash wazuh-install.sh --wazuh-dashboard "${NODE_NAME}" -i
 
 # ---------------------------------------------------------------------------
 # 5. Extract default admin credentials
