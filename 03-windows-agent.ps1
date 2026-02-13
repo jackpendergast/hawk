@@ -147,11 +147,12 @@ if (Test-Path $clamscanExe) {
     Write-Host "[*] Creating hourly scan scheduled task..."
     $Action = New-ScheduledTaskAction -Execute $clamscanExe `
                -Argument "--recursive --infected --log=`"$ClamDir\scan.log`" C:\"
-    # Use -Once with indefinite repetition for hourly runs
-    $Trigger = New-ScheduledTaskTrigger -Daily -At (Get-Date).AddMinutes(5)
-
-    $Trigger.Repetition.Interval = (New-TimeSpan -Hours 1)
-    $Trigger.Repetition.Duration = ([TimeSpan]::MaxValue)
+   $Trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(5)
+    
+    $Repetition = New-ScheduledTaskTrigger -Once -At (Get-Date)
+    $Repetition = $Trigger.Repetition
+    $Repetition.Interval = (New-TimeSpan -Hours 1)
+    $Repetition.Duration = ([TimeSpan]::MaxValue)
 
     $Settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -DontStopIfGoingOnBatteries
     Register-ScheduledTask -TaskName "ClamAV_Hourly_Scan" -Action $Action `
