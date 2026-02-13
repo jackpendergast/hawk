@@ -20,6 +20,7 @@ done
 WAZUH_VERSION="4.7"
 NODE_NAME="wazuh-aio"        # arbitrary single-node name
 DASHBOARD_PORT=443
+AUTH_PASSWORD="MyStrongKey"
 
 # ---------------------------------------------------------------------------
 # Detect the IP that will be used by agents to reach this manager.
@@ -89,7 +90,31 @@ echo "[*] Installing Wazuh Dashboard..."
 bash wazuh-install.sh --wazuh-dashboard "${NODE_NAME}" -i
 
 # ---------------------------------------------------------------------------
-# 5. Extract default admin credentials
+# 5. Configure manager to require password authentication
+# ---------------------------------------------------------------------------
+echo "[*] Configuring Wazuh manager to require authd password..."
+
+OSSEC_CONF="/var/ossec/etc/ossec.conf"
+
+if grep -q "<auth>" "$OSSEC_CONF"; then
+    sed -i 's|<use_password>.*</use_password>|<use_password>yes</use_password>|' "$OSSEC_CONF"
+else
+    sed -i '/<\/ossec_config>/i \
+  <auth>\n\
+    <use_password>yes</use_password>\n\
+  </auth>' "$OSSEC_CONF"
+fi
+
+echo "[*] Creating authd password file..."
+echo "${AUTH_PASSWORD}" > /var/ossec/etc/authd.pass
+chmod 640 /var/ossec/etc/authd.pass
+chown root:wazuh /var/ossec/etc/authd.pass
+
+echo "[*] Restarting Wazuh manager..."
+systemctl restart wazuh-manager
+
+# ---------------------------------------------------------------------------
+# 6. Extract default admin credentials
 # ---------------------------------------------------------------------------
 echo ""
 echo "=========================================="
