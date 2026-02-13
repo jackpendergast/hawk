@@ -1,4 +1,4 @@
-# CCDC Wazuh + ClamAV Rapid Deployment (Inject SVRA12T)
+# CCDC Wazuh + ClamAV Rapid Deployment
 
 ## Overview
 
