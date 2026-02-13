@@ -84,35 +84,28 @@ else
     echo "[*] Detecting ClamAV daemon service..."
 
     # Stronger detection for Fedora / Oracle Linux / RHEL
-    if systemctl list-unit-files | grep -q "clamd@scan"; then
-        CLAMD_SVC="clamd@scan"
-        echo "[*] Found clamd@scan.service"
-    elif systemctl list-unit-files | grep -q "clamd@"; then
-        CLAMD_SVC="clamd@scan"
-        echo "[*] Found clamd@ template → using clamd@scan"
-    else
-        echo "[!] Could not detect clamd service. Trying manual start instead..."
-        CLAMD_SVC="clamd@scan"
-    fi
+    # Force clamd@scan for Fedora / Oracle Linux / RHEL family (aggressive, no detection needed)
+    CLAMD_SVC="clamd@scan"
+    echo "[*] Using forced ClamAV daemon service: $CLAMD_SVC"
     
-    # Critical fixes for Fedora
+    # Ensure the scan config is usable (remove Example line if present)
     sed -i 's/^Example/#Example/' /etc/clamd.d/scan.conf 2>/dev/null || true
-    sed -i 's/^#LocalSocket/LocalSocket/' /etc/clamd.d/scan.conf 2>/dev/null || true
     
-    systemctl enable --now "$CLAMD_SVC" 2>/dev/null || true
+    # Make sure LocalSocket is set (uncomment or add if missing)
+    sed -i 's/^#LocalSocket/LocalSocket/' /etc/clamd.d/scan.conf 2>/dev/null || \
+        { grep -q "^LocalSocket" /etc/clamd.d/scan.conf || echo "LocalSocket /run/clamd.scan/clamd.sock" >> /etc/clamd.d/scan.conf; }
+    
+    # Enable and start services
+    systemctl enable --now "$CLAMD_SVC" || echo "[!] Failed to enable $CLAMD_SVC – check if installed correctly"
     systemctl enable --now clamav-freshclam 2>/dev/null || true
     
-    # Final verification
+    # Quick verification
     if systemctl is-active --quiet "$CLAMD_SVC"; then
         echo "[✓] ClamAV daemon ($CLAMD_SVC) is now running!"
     else
-        echo "[!] Warning: ClamAV daemon failed to start. Check logs with: systemctl status $CLAMD_SVC"
+        echo "[!] ClamAV daemon failed to start. Run 'systemctl status $CLAMD_SVC' for details."
     fi
-    systemctl enable --now "$CLAMD_SVC"
-    systemctl enable --now clamav-freshclam 2>/dev/null || true
 fi
-
-echo "[*] ClamAV daemon is running."
 
 # ---------------------------------------------------------------------------
 # Create systemd timer for hourly ClamAV full scan
