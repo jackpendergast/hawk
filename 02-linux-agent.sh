@@ -30,7 +30,7 @@ fi
 WAZUH_VERSION="4.7"
 WAZUH_AGENT_DEB="wazuh-agent_4.7.3-1_amd64.deb"
 WAZUH_AGENT_RPM="wazuh-agent-4.7.3-1.x86_64.rpm"
-REG_PASSWORD="MyStrongKey"
+REG_PASSWORD="ja|ZtS72E'&tEQ46=P=B"
 
 # ---------------------------------------------------------------------------
 # Args
