@@ -57,7 +57,7 @@ try {
 
 # Silent install per the inject: ADDLOCAL="ClamAV,FreshClam"
 Write-Host "[*] Installing ClamAV (silent)..."
-Start-Process msiexec.exe -ArgumentList "/i `"$ClamPath`" ADDLOCAL=`"ClamAV,FreshClam`" /qn" -Wait -NoNewWindow
+Start-Process msiexec.exe -ArgumentList "/i `"$ClamPath`" /qn" -Wait -NoNewWindow
 
 # Give the installer a moment to finish writing files
 Start-Sleep -Seconds 5
