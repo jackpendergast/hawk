@@ -17,7 +17,7 @@ param(
     [Parameter(Mandatory=$true)]
     [string]$ManagerIP,
 
-    [string]$RegPassword = "MyStrongKey"
+    [string]$RegPassword = "ja|ZtS72E'&tEQ46=P=B"
 )
 
 $ErrorActionPreference = "Stop"
