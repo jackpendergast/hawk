@@ -80,7 +80,8 @@ else
     # Initial signature update
     freshclam || echo "[!] freshclam initial pull failed"
     # Figure out which service name exists
-    if systemctl list-unit-files | grep -q "clamd@scan"; then
+    # Figure out which service name exists
+    if systemctl list-unit-files | grep -q "clamd@"; then  # Changed from "clamd@scan" to "clamd@"
         CLAMD_SVC="clamd@scan"
         # Ensure the scan config is usable (RHEL/Oracle often ship with Example line)
         sed -i 's/^Example/#Example/' /etc/clamd.d/scan.conf 2>/dev/null || true
@@ -90,7 +91,9 @@ else
     elif systemctl list-unit-files | grep -q "clamav-daemon"; then
         CLAMD_SVC="clamav-daemon"
     else
-        CLAMD_SVC="clamd"
+        echo "[!] No supported ClamAV daemon service found. Skipping enable."
+        #Optionally, add a fallback or exit here if critical
+        continue  # Or exit 1 if you want to halt
     fi
     systemctl enable --now "$CLAMD_SVC"
     systemctl enable --now clamav-freshclam 2>/dev/null || true
