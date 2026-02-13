@@ -20,7 +20,7 @@ done
 WAZUH_VERSION="4.7"
 NODE_NAME="wazuh-aio"        # arbitrary single-node name
 DASHBOARD_PORT=443
-AUTH_PASSWORD="MyStrongKey"
+AUTH_PASSWORD="ja|ZtS72E'&tEQ46=P=B"
 
 # ---------------------------------------------------------------------------
 # Detect the IP that will be used by agents to reach this manager.
