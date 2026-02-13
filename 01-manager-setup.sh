@@ -136,3 +136,79 @@ echo " NEXT STEPS:"
 echo "   On Linux agents:  sudo bash 02-linux-agent.sh ${MANAGER_IP}"
 echo "   On Windows hosts: .\\03-windows-agent.ps1 -ManagerIP ${MANAGER_IP}"
 echo ""
+
+# ===========================================================================
+# PHASE 2: CCDC Defense Config Deployment
+# ===========================================================================
+echo "=========================================="
+echo " PHASE 2: CCDC Defense Configuration"
+echo "=========================================="
+echo ""
+echo " This will:"
+echo "   - Install custom CCDC detection rules (webshells, persistence, etc.)"
+echo "   - Deploy centralized agent config (FIM, rootcheck, service monitoring)"
+echo "   - Configure log forwarding to Splunk (172.20.242.20:9000)"
+echo "   - Lower alert thresholds to catch all red team activity"
+echo "   - Enable vulnerability detection"
+echo ""
+echo " Make sure agents are connecting before proceeding."
+echo " Check the dashboard at https://${MANAGER_IP}:${DASHBOARD_PORT}"
+echo ""
+read -rp "Press ENTER to deploy CCDC defense config (or Ctrl+C to skip)..."
+
+# ---------------------------------------------------------------------------
+# Determine where the config files are.
+# If we're running from the cloned repo, use local files.
+# Otherwise, download them from GitHub.
+# ---------------------------------------------------------------------------
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_URL="https://raw.githubusercontent.com/jackpendergast/hawk/main"
+CCDC_DIR=""
+
+if [[ -d "${SCRIPT_DIR}/wazuh-ccdc-config" ]]; then
+    echo "[*] Found local wazuh-ccdc-config directory."
+    CCDC_DIR="${SCRIPT_DIR}/wazuh-ccdc-config"
+else
+    echo "[*] Downloading CCDC config files from GitHub..."
+    CCDC_DIR="/tmp/wazuh-ccdc-config"
+    mkdir -p "${CCDC_DIR}/manager" "${CCDC_DIR}/rules" "${CCDC_DIR}/splunk"
+
+    curl -sO --output-dir "${CCDC_DIR}" "${REPO_URL}/wazuh-ccdc-config/setup-wazuh-ccdc.sh"
+    curl -sO --output-dir "${CCDC_DIR}" "${REPO_URL}/wazuh-ccdc-config/setup-splunk-receiver.sh"
+    curl -sO --output-dir "${CCDC_DIR}/manager" "${REPO_URL}/wazuh-ccdc-config/manager/agent.conf"
+    curl -sO --output-dir "${CCDC_DIR}/manager" "${REPO_URL}/wazuh-ccdc-config/manager/ossec.conf"
+    curl -sO --output-dir "${CCDC_DIR}/rules" "${REPO_URL}/wazuh-ccdc-config/rules/ccdc_rules.xml"
+    curl -sO --output-dir "${CCDC_DIR}/splunk" "${REPO_URL}/wazuh-ccdc-config/splunk/inputs.conf"
+    curl -sO --output-dir "${CCDC_DIR}/splunk" "${REPO_URL}/wazuh-ccdc-config/splunk/props.conf"
+    curl -sO --output-dir "${CCDC_DIR}/splunk" "${REPO_URL}/wazuh-ccdc-config/splunk/indexes.conf"
+    curl -sO --output-dir "${CCDC_DIR}/splunk" "${REPO_URL}/wazuh-ccdc-config/splunk/ccdc_warroom.xml"
+
+    chmod +x "${CCDC_DIR}/setup-wazuh-ccdc.sh"
+    chmod +x "${CCDC_DIR}/setup-splunk-receiver.sh"
+
+    echo "[*] Download complete."
+fi
+
+# ---------------------------------------------------------------------------
+# Run the CCDC config deployment
+# ---------------------------------------------------------------------------
+SPLUNK_IP="172.20.242.20"
+echo "[*] Deploying CCDC defense config (Splunk IP: ${SPLUNK_IP})..."
+bash "${CCDC_DIR}/setup-wazuh-ccdc.sh" "${SPLUNK_IP}"
+
+echo ""
+echo "=========================================="
+echo " ALL DONE - Manager + CCDC Config"
+echo "=========================================="
+echo ""
+echo " Dashboard:   https://${MANAGER_IP}:${DASHBOARD_PORT}"
+echo " Manager IP:  ${MANAGER_IP}"
+echo ""
+echo " Remaining manual step:"
+echo "   On the Splunk box (${SPLUNK_IP}), run:"
+echo "     git clone https://github.com/jackpendergast/hawk.git"
+echo "     cd hawk/wazuh-ccdc-config"
+echo "     sudo bash setup-splunk-receiver.sh"
+echo ""
+echo " Then verify in Splunk Web with:  index=wazuh | head 10"
+echo "=========================================="
